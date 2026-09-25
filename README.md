@@ -22,3 +22,48 @@ public class Main {
         System.out.println("Quarto? " + win);
     }
 }
+public static boolean hasQuarto(Board board) {
+
+    // righe
+    for (int row = 0; row < 4; row++) {
+
+        if (isWinningLine(
+                board.getPiece(row, 0),
+                board.getPiece(row, 1),
+                board.getPiece(row, 2),
+                board.getPiece(row, 3))) {
+
+            return true;
+        }
+    }
+
+    // colonne
+    for (int col = 0; col < 4; col++) {
+
+        if (isWinningLine(
+                board.getPiece(0, col),
+                board.getPiece(1, col),
+                board.getPiece(2, col),
+                board.getPiece(3, col))) {
+
+            return true;
+        }
+    }
+
+    // diagonale principale
+    if (isWinningLine(
+            board.getPiece(0, 0),
+            board.getPiece(1, 1),
+            board.getPiece(2, 2),
+            board.getPiece(3, 3))) {
+
+        return true;
+    }
+
+    // diagonale secondaria
+    return isWinningLine(
+            board.getPiece(0, 3),
+            board.getPiece(1, 2),
+            board.getPiece(2, 1),
+            board.getPiece(3, 0));
+}
