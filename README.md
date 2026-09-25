@@ -1,66 +1,185 @@
+import java.util.Scanner;
+
 public class Main {
 
     public static void main(String[] args) {
 
+        Scanner scanner = new Scanner(System.in);
+
         Board board = new Board();
 
-        // Tre pezzi già presenti
-        board.placePiece(0, 0, new Piece(1));  // 0001
-        board.placePiece(0, 1, new Piece(5));  // 0101
-        board.placePiece(0, 2, new Piece(9));  // 1001
+        // true = pezzo ancora disponibile
+        boolean[] availablePieces = new boolean[16];
 
-        // Pezzo che l'avversario ci ha dato
-        Piece pieceToPlace = new Piece(13);    // 1101
+        for (int i = 0; i < 16; i++) {
+            availablePieces[i] = true;
+        }
 
-        System.out.println("Situazione iniziale:");
-        board.printBoard();
-
-        int[] winningMove =
-                Solver.findImmediateWin(board, pieceToPlace);
-
+        System.out.println("=== QUARTO ===");
         System.out.println();
 
-        if (winningMove != null) {
+        System.out.println("I pezzi vanno da 0 a 15:");
+        printAvailablePieces(availablePieces);
+
+        // Il giocatore 1 sceglie il primo pezzo
+        System.out.println();
+        System.out.println("Giocatore 1: scegli il pezzo da dare al Giocatore 2");
+
+        int selectedPiece =
+                choosePiece(scanner, availablePieces);
+
+        // Il pezzo non sarà più disponibile
+        availablePieces[selectedPiece] = false;
+
+        int currentPlayer = 2;
+
+        while (true) {
+
+            System.out.println();
+            System.out.println("===========================");
+            System.out.println("Turno del Giocatore " + currentPlayer);
+            System.out.println("===========================");
+
+            Piece pieceToPlace = new Piece(selectedPiece);
 
             System.out.println(
-                    "Mossa vincente trovata: riga "
-                    + winningMove[0]
-                    + ", colonna "
-                    + winningMove[1]
+                    "Devi piazzare il pezzo: "
+                    + pieceToPlace
+                    + " (" + selectedPiece + ")"
             );
 
-        } else {
-            System.out.println("Nessuna vittoria immediata.");
-        }
-    }
-}
+            board.printBoard();
 
-public class Solver {
+            int row;
+            int col;
 
-    public static int[] findImmediateWin(Board board, Piece piece) {
+            while (true) {
 
-        for (int row = 0; row < 4; row++) {
+                System.out.print("Riga (0-3): ");
+                row = scanner.nextInt();
 
-            for (int col = 0; col < 4; col++) {
+                System.out.print("Colonna (0-3): ");
+                col = scanner.nextInt();
 
-                if (!board.isEmpty(row, col)) {
-                    continue;
+                if (
+                        row >= 0 && row < 4 &&
+                        col >= 0 && col < 4 &&
+                        board.isEmpty(row, col)
+                ) {
+                    break;
                 }
 
-                // Provo temporaneamente il pezzo
-                board.placePiece(row, col, piece);
+                System.out.println(
+                        "Posizione non valida. Riprova."
+                );
+            }
 
-                boolean win = WinChecker.hasQuarto(board);
+            board.placePiece(row, col, pieceToPlace);
 
-                // Rimetto la board com'era
-                board.removePiece(row, col);
+            System.out.println();
+            System.out.println("Scacchiera aggiornata:");
 
-                if (win) {
-                    return new int[]{row, col};
-                }
+            board.printBoard();
+
+            // Controlliamo se il giocatore ha vinto
+            if (WinChecker.hasQuarto(board)) {
+
+                System.out.println();
+                System.out.println(
+                        "QUARTO! Vince il Giocatore "
+                        + currentPlayer
+                );
+
+                break;
+            }
+
+            // Se non ci sono più pezzi la partita è finita
+            if (!hasAvailablePieces(availablePieces)) {
+
+                System.out.println();
+                System.out.println("Partita terminata in pareggio.");
+
+                break;
+            }
+
+            System.out.println();
+            System.out.println(
+                    "Giocatore " + currentPlayer +
+                    ": scegli il pezzo da dare all'avversario"
+            );
+
+            printAvailablePieces(availablePieces);
+
+            selectedPiece =
+                    choosePiece(scanner, availablePieces);
+
+            availablePieces[selectedPiece] = false;
+
+            // Cambio giocatore
+            if (currentPlayer == 1) {
+                currentPlayer = 2;
+            } else {
+                currentPlayer = 1;
             }
         }
 
-        return null;
+        scanner.close();
+    }
+
+    public static int choosePiece(
+            Scanner scanner,
+            boolean[] availablePieces) {
+
+        while (true) {
+
+            System.out.print("Pezzo (0-15): ");
+
+            int piece = scanner.nextInt();
+
+            if (
+                    piece >= 0 &&
+                    piece < 16 &&
+                    availablePieces[piece]
+            ) {
+                return piece;
+            }
+
+            System.out.println(
+                    "Pezzo non valido o già utilizzato."
+            );
+        }
+    }
+
+    public static void printAvailablePieces(
+            boolean[] availablePieces) {
+
+        for (int i = 0; i < 16; i++) {
+
+            if (availablePieces[i]) {
+
+                String binary =
+                        String.format(
+                                "%4s",
+                                Integer.toBinaryString(i)
+                        ).replace(' ', '0');
+
+                System.out.println(
+                        i + " -> " + binary
+                );
+            }
+        }
+    }
+
+    public static boolean hasAvailablePieces(
+            boolean[] availablePieces) {
+
+        for (boolean available : availablePieces) {
+
+            if (available) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
