@@ -1,31 +1,24 @@
-public class WinChecker {
+public class Main {
 
-    public static boolean isWinningLine(
-            Piece p1,
-            Piece p2,
-            Piece p3,
-            Piece p4) {
+    public static void main(String[] args) {
 
-        if (p1 == null ||
-            p2 == null ||
-            p3 == null ||
-            p4 == null) {
+        Board board = new Board();
 
-            return false;
-        }
+        Piece p1 = new Piece(1);   // 0001
+        Piece p2 = new Piece(5);   // 0101
+        Piece p3 = new Piece(9);   // 1001
+        Piece p4 = new Piece(13);  // 1101
 
-        int a = p1.getValue();
-        int b = p2.getValue();
-        int c = p3.getValue();
-        int d = p4.getValue();
+        board.placePiece(0, 0, p1);
+        board.placePiece(0, 1, p2);
+        board.placePiece(0, 2, p3);
+        board.placePiece(0, 3, p4);
 
-        // caratteristiche che valgono 1 in tutti
-        int commonOnes = a & b & c & d;
+        board.printBoard();
 
-        // caratteristiche che valgono 0 in tutti
-        int commonZeros =
-                (~a & ~b & ~c & ~d) & 0b1111;
+        boolean win = WinChecker.hasQuarto(board);
 
-        return commonOnes != 0 || commonZeros != 0;
+        System.out.println();
+        System.out.println("Quarto? " + win);
     }
 }
